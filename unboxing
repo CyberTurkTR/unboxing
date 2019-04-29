@@ -1,0 +1,61 @@
+local color = "Pastel brown"
+local Active = false
+
+local Areas = {
+	["Castle"] = "Bright violet",
+	["Sand Kingdom"] = "Moss",
+	["Haunted"] = "Neon orange",
+	["Futureville"] = "Ghost grey",
+	["Pirate Paradise"] = "Pine Cone"
+}
+
+for i,v in next, Areas do
+	if game.ReplicatedStorage.Aero.AeroRemoteServices.PlayerDataService.GetStats:InvokeServer().Areas[i] == true then color = v end 
+end
+
+spawn(function()
+	while wait()do
+		if Active then
+			for i,v in pairs(game.Workspace.Chests:GetChildren()) do
+    			if v:IsA("Model") and v:FindFirstChild("Base") and v.Base.BrickColor == BrickColor.new(color) then 
+			        game:GetService("ReplicatedStorage").Aero.AeroRemoteServices.ChestService.ConnectPlayer:FireServer(v.Name)
+			        game:GetService("ReplicatedStorage").Aero.AeroRemoteServices.QuestService.Collect:InvokeServer("Damage")
+			        game:GetService("ReplicatedStorage").Aero.AeroRemoteServices.QuestService.Collect:InvokeServer("HatLevel")
+    			end
+			end
+		end
+	end
+end)
+spawn(function()
+	while wait() do
+		if Active then
+			for _,v in next, workspace.Rewards:GetDescendants() do
+				if v.Parent == workspace.Rewards then
+					v.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+				end
+			end
+		end
+	end
+end)
+
+
+
+local gui = loadstring(game:HttpGet("https://raw.githubusercontent.com/CyberTurkTR/unboxing/master/gui", true))():CreateWindow({text = "Unbox Simulator"})
+
+gui:AddButton("Bring Enchant", function()
+	workspace.InteractionPoints.Enchant.Hitbox.CanCollide = false
+	workspace.InteractionPoints.Enchant.Hitbox.Position = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+end)
+
+gui:AddButton("TP to your Area", function()
+	for i,v in next, Areas do
+		if game.ReplicatedStorage.Aero.AeroRemoteServices.PlayerDataService.GetStats:InvokeServer().Areas[i] == true then lastarea=i end 
+	end
+	game.Players.LocalPlayer.Character:MoveTo(workspace.Areas[lastarea].Floor.Position)
+end)
+
+gui:AddToggle("Auto Farm", function(f)
+	Active = not Active
+end)
+
+local VirtualUser=game:service'VirtualUser';game:service'Players'.LocalPlayer.Idled:connect(function()VirtualUser:CaptureController()VirtualUser:ClickButton2(Vector2.new())end)
